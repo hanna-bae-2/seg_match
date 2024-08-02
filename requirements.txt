@@ -1,0 +1,8 @@
+pycolmap==0.4.0
+torch==1.10.0+cu111
+torchvision==0.11.0+cu111
+mmcv==1.5.0
+mmseg==0.20.2
+timm==0.9.12
+tqdm==4.64.1
+yacs==0.1.8
