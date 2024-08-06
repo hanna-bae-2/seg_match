@@ -100,6 +100,10 @@ class MegaDepthDataset(Dataset):
         T_0to1 = torch.tensor(np.matmul(T1, np.linalg.inv(T0)), dtype=torch.float)[:4, :4]  # (4, 4)
         T_1to0 = T_0to1.inverse()
 
+        # read conf masks 
+        conf_mask0 = self.load_conf_file(img_name0, self.root_dir)
+        conf_mask1 = self.load_conf_file(img_name1, self.root_dir)
+
         data = {
             'image0': image0,  # (1, h, w)
             'depth0': depth0,  # (h, w)
@@ -115,6 +119,8 @@ class MegaDepthDataset(Dataset):
             'scene_id': self.scene_id,
             'pair_id': idx,
             'pair_names': (self.scene_info['image_paths'][idx0], self.scene_info['image_paths'][idx1]),
+            'conf_mask0' : conf_mask0,
+            'conf_mask1' : conf_mask1, 
         }
 
         # for LoFTR training
@@ -127,3 +133,13 @@ class MegaDepthDataset(Dataset):
             data.update({'mask0': ts_mask_0, 'mask1': ts_mask_1})
 
         return data
+    
+    def load_conf_file(self, img_path, root_path):
+        root = osp.join(root_path, 'segment')
+        conf_path = osp.join(root, f"conf_{osp.basename(img_path).split('.')[0]}.txt")
+        if osp.exists(conf_path):
+            conf_mask = np.loadtxt(conf_path, dtype=int, delimiter=' ')
+            return conf_mask
+        else:
+            raise FileNotFoundError(f"Conf file {conf_path} not found")
+
